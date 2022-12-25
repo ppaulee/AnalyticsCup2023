@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(stringr)
+library(stringi)
 
 
 setwd("D:/_uni/analcup2023")
@@ -8,17 +9,17 @@ setwd("D:/_uni/analcup2023")
 # Load data
 business_units        <- read.csv(file = 'data/business_units.csv')
 classification        <- read.csv(file = 'data/classification.csv')
-customers             <- read.csv(file = 'data/customers.csv')
-sales_orders          <- read.csv(file = 'data/sales_orders.csv')
+customers             <- read.csv(file = 'data/customers_w_id.csv', colClasses=c("Sales_Order_ID"="character"))
+sales_orders          <- read.csv(file = 'data/sales_orders_w_id.csv', colClasses=c("Sales_Order_ID"="character"))
 sales_orders_header   <- read.csv(file = 'data/sales_orders_header.csv')
 service_map           <- read.csv(file = 'data/service_map.csv')
 
-summary(classification)
-summary(customers)
-summary(sales_orders_header)
-summary(sales_orders)
-summary(business_units)
-summary(service_map)
+#summary(classification)
+#summary(customers)
+#summary(sales_orders_header)
+#summary(sales_orders)
+#summary(business_units)
+#summary(service_map)
 
 
 # data to right format
@@ -33,8 +34,6 @@ customers <- transform(
   Sales_Order = toString(Sales_Order),
   Item_Position = toString(Item_Position)
 )
-customers$Sales_Order_ID <- stri_join(customers$Sales_Order, customers$Item_Position)
-print(stri_join("64755843740232540760231662788114647939966152591369452945472134175031264493121","0000"))
 
 # remove last 4 chars from Release_Date
 sales_orders_header$Release_Date <- substr(sales_orders_header$Release_Date, 0, nchar(sales_orders_header$Release_Date)-4)
@@ -53,7 +52,8 @@ sales_orders <- transform(
   Sales_Order = toString(Sales_Order),
   Item_Position = toString(Item_Position)
 )
-sales_orders$Sales_Order_ID <- stri_paste(sales_orders$Sales_Order, sales_orders$Item_Position)
+
+
 
 business_units <- transform(
   business_units,
@@ -61,9 +61,9 @@ business_units <- transform(
 )
 
 # join classification with customers
-join <- merge(classification, customers, by = "Customer_ID")
+join <- merge(classification, customers, by = "Customer_ID", suffix = c("CL", "CU"))
 # join classification__customers with sales_orders
-join <- merge(join, sales_orders, by = "Sales_Order_ID")
+join <- merge(join, sales_orders, by = "Sales_Order_ID", suffix = c("CL", "SO"))
 # join sales_orders__classification__customers with sales_orders_header
 join <- merge(join, sales_orders_header, by = "Sales_Order")
 # join sales_orders_header__sales_orders__classification__customers with business_units
