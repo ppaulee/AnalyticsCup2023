@@ -129,7 +129,7 @@ customers_end_result <- merge(customers_end_result, business_units, by = "Cost_C
 
 customers_end_result$is_Service <- customers_end_result$Material_Class %in% service_map$MATKL_service
 
-customers_end_result <- select(customers_end_result, -c("Sales_Order","Material_Class", "Item_Position", "YHKOKRS"))
+customers_end_result <- select(customers_end_result, -c("Sales_Order","Material_Class", "Item_Position", "YHKOKRS", "Customer_ID", "Material_Code"))
 
 training_data <- customers_end_result %>% filter(!is.na(Reseller)) %>% select(-"Test_set_id")
 
@@ -146,6 +146,6 @@ train_data <- training_data[train_Index,]
 test_data <- training_data[-train_Index,]
 
 log_model <- glm(Reseller~.,data = train_data, family="binomial")
-cor(training_data$Type, training_data$Cost_Center)
+
 
 
